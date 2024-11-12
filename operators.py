@@ -55,8 +55,15 @@ class AddColorAttribute(bpy.types.Operator):
         if len(self.objs) < 1:
             self.report({"ERROR_INVALID_CONTEXT"}, "No mesh objects selected. Cancelling Operator.")
             return {"CANCELLED"}
-        # TODO : Verify if existing.
-        # TODO : If not, adding custom color attribute.
+        
+        already_exist = []
+        for obj in self.objs:
+            if not(obj.data.vertex_colors.get(self.attribute_name) or obj.data.color_attributes.get(self.attribute_name)):
+                obj.data.color_attributes.new(name=self.attribute_name, type="FLOAT_COLOR", domain="POINT")
+            else:
+                already_exist.append(obj.name)
+        
+        if len(already_exist)>0 : self.report({"WARNING"}, f'Attribute "{self.attribute_name}" already exist for {", ".join(already_exist)}')
         return {"FINISHED"}
     
     def invoke(self, context, event):
