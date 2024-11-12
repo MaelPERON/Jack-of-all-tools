@@ -5,6 +5,27 @@ from random import random
 def selectedMeshObjects(context):
     return [obj for obj in context.selected_objects if obj.type == "MESH"]
 
+def setAttributeColor(context, obj, attribute, color):
+    # Selecting this object only
+    attribute = obj.data.color_attributes[attribute]
+    if not attribute:
+        return
+    obj.data.attributes.active_color = attribute
+    bpy.ops.object.mode_set(mode="OBJECT")
+    bpy.ops.object.select_all(action="DESELECT")
+    obj.select_set(state=True)
+    context.view_layer.objects.active = obj
+
+    # Selecting all the mesh
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.object.mode_set(mode="VERTEX_PAINT")
+    use_paint_mask = bpy.context.object.data.use_paint_mask
+    bpy.context.object.data.use_paint_mask = True
+    bpy.context.tool_settings.vertex_paint.brush.color = mathutils.Color(color)
+    bpy.ops.paint.vertex_color_set()
+    bpy.context.object.data.use_paint_mask = use_paint_mask
+
 class CleanColorAttributes(bpy.types.Operator):
     bl_idname = "object.clean_color_attributes"
     bl_label = "Clean Color Attributes"
@@ -68,24 +89,9 @@ class AddColorAttribute(bpy.types.Operator):
             else:
                 already_exist.append(obj.name)
 
-            # Selecting this object only
-            bpy.ops.object.mode_set(mode="OBJECT")
-            bpy.ops.object.select_all(action="DESELECT")
-            obj.select_set(state=True)
-            context.view_layer.objects.active = obj
-
-            # Selecting all the mesh
-            bpy.ops.object.mode_set(mode="EDIT")
-            bpy.ops.mesh.select_all(action='SELECT')
-            bpy.ops.object.mode_set(mode="VERTEX_PAINT")
-            use_paint_mask = bpy.context.object.data.use_paint_mask
-            bpy.context.object.data.use_paint_mask = True
             color = (random() for _ in range(3)) if getattr(self, "random_color") else getattr(self, "default_color")
-            bpy.context.tool_settings.vertex_paint.brush.color = mathutils.Color(color)
-            bpy.ops.paint.vertex_color_set()
-            bpy.context.object.data.use_paint_mask = use_paint_mask
+            setAttributeColor(context, obj, self.attribute_name, color)
 
-        # Returning to default status
         bpy.ops.object.mode_set(mode=curr_mode)
         
         if len(already_exist)>0 : self.report({"WARNING"}, f'Attribute "{self.attribute_name}" already exist for {", ".join(already_exist)}. Colors have been replaced.')
