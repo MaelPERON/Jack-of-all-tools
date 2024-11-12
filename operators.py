@@ -1,5 +1,7 @@
 import bpy
 
+def selectedMeshObjects(context):
+    return [obj for obj in context.selected_objects if obj.type == "MESH"]
 
 class CleanColorAttributes(bpy.types.Operator):
     bl_idname = "object.clean_color_attributes"
