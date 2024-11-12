@@ -34,8 +34,22 @@ class AddColorAttribute(bpy.types.Operator):
     bl_idname = "object.add_color_attribute"
     bl_label = "Add Color Attribute"
 
+    attribute_name: bpy.props.StringProperty(name="Attribute Name",default="Attribute")
+    random_color: bpy.props.BoolProperty(default=False,name="Use random color")
+    default_color: bpy.props.FloatVectorProperty(name="Default Color",subtype="COLOR")
+
     @classmethod
     def poll(self, context): return True
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.prop(self, "attribute_name")
+        layout.prop(self, "random_color")
+
+        row = layout.row()
+        row.enabled = not getattr(self, "random_color")
+        row.prop(self, "default_color")
 
     def execute(self, context):
         if len(self.objs) < 1:
@@ -47,4 +61,4 @@ class AddColorAttribute(bpy.types.Operator):
     
     def invoke(self, context, event):
         self.objs = selectedMeshObjects(context)
-        return context.window_manager.invoke_props_popup(self)
+        return context.window_manager.invoke_props_dialog(self)
