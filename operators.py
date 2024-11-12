@@ -9,7 +9,7 @@ def setAttributeColor(context, obj, attribute, color):
     # Selecting this object only
     attribute = obj.data.color_attributes[attribute]
     if not attribute:
-        return
+        return False
     obj.data.attributes.active_color = attribute
     bpy.ops.object.mode_set(mode="OBJECT")
     bpy.ops.object.select_all(action="DESELECT")
@@ -25,6 +25,8 @@ def setAttributeColor(context, obj, attribute, color):
     bpy.context.tool_settings.vertex_paint.brush.color = mathutils.Color(color)
     bpy.ops.paint.vertex_color_set()
     bpy.context.object.data.use_paint_mask = use_paint_mask
+
+    return True
 
 class CleanColorAttributes(bpy.types.Operator):
     bl_idname = "object.clean_color_attributes"
@@ -85,12 +87,10 @@ class AddColorAttribute(bpy.types.Operator):
             if not(obj.data.vertex_colors.get(self.attribute_name) or obj.data.color_attributes.get(self.attribute_name)):
                 # Creating the attribute
                 obj.data.color_attributes.new(name=self.attribute_name, type="FLOAT_COLOR", domain="POINT")
-
+                color = (random() for _ in range(3)) if getattr(self, "random_color") else getattr(self, "default_color")
+                setAttributeColor(context, obj, self.attribute_name, color)
             else:
                 already_exist.append(obj.name)
-
-            color = (random() for _ in range(3)) if getattr(self, "random_color") else getattr(self, "default_color")
-            setAttributeColor(context, obj, self.attribute_name, color)
 
         bpy.ops.object.mode_set(mode=curr_mode)
         
