@@ -27,3 +27,7 @@ class CleanColorAttributes(bpy.types.Operator):
                 obj.data.color_attributes.remove(attr)
 
         return {"FINISHED"}
+    
+class AddColorAttribute(bpy.types.Operator):
+    bl_idname = "object.add_color_attribute"
+    bl_label = "Add Color Attribute"
