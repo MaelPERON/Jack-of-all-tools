@@ -33,3 +33,18 @@ class CleanColorAttributes(bpy.types.Operator):
 class AddColorAttribute(bpy.types.Operator):
     bl_idname = "object.add_color_attribute"
     bl_label = "Add Color Attribute"
+
+    @classmethod
+    def poll(self, context): return True
+
+    def execute(self, context):
+        if len(self.objs) < 1:
+            self.report({"ERROR_INVALID_CONTEXT"}, "No mesh objects selected. Cancelling Operator.")
+            return {"CANCELLED"}
+        # TODO : Verify if existing.
+        # TODO : If not, adding custom color attribute.
+        return {"FINISHED"}
+    
+    def invoke(self, context, event):
+        self.objs = selectedMeshObjects(context)
+        return context.window_manager.invoke_props_popup(self)
