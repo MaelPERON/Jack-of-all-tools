@@ -1,5 +1,5 @@
 import bpy
-
+from math import radians
 
 def menu_merge(self, context):
     layout = self.layout
@@ -10,6 +10,9 @@ def menu_uv(self, context):
     layout = self.layout
     layout.separator()
     layout.operator("mesh.edges_select_sharp",icon="IPO_CONSTANT")
+    for angle in [30,60,90]:
+        op = layout.operator("mesh.edges_select_sharp",text=f'{angle}°',icon="IPO_CONSTANT")
+        op.sharpness = radians(angle-1)
 
 
 def register():
