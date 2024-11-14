@@ -53,6 +53,22 @@ class ViewportDisplay(bpy.types.Menu):
         box.prop(obj, "show_axes")
         box.prop(obj, "show_wire")
 
+        if obj.type == "ARMATURE":
+            box = pie.box()
+            box.label(text="Armature",icon="ARMATURE_DATA")
+            arm = obj.data
+            props = [
+                ["display_type",None],
+                ["show_names","FILE_TEXT"],
+                ["show_axes","EMPTY_ARROWS"],
+                ["show_bone_custom_shapes","BONE_DATA"],
+                ["show_bone_colors","COLOR"]
+            ]
+            for prop, icon in props:
+                args = { "data": arm, "property": prop, "text": ' '.join([word.capitalize() for word in prop.split("_")]) }
+                if icon: args["icon"] = icon
+                box.prop(**args)
+
 
 def register():
     bpy.types.VIEW3D_MT_edit_mesh_merge.append(menu_merge)
