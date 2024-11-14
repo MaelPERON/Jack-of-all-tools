@@ -27,6 +27,32 @@ class QuickMenu(bpy.types.Menu):
         layout.prop(obj, "name")
         global from_quickmenu
         from_quickmenu = True
+        layout.operator("wm.call_menu_pie", text=ViewportDisplay.bl_label).name = ViewportDisplay.bl_idname
+        
+class ViewportDisplay(bpy.types.Menu):
+    bl_label = "Viewport Display"
+    bl_idname = "VIEW3D_MT_joat_display"
+
+    def draw(self, context):
+        pie = self.layout.menu_pie()
+        obj = context.object
+        # Return option
+        global from_quickmenu
+        if from_quickmenu:
+            pie.operator("wm.call_menu_pie", text=QuickMenu.bl_label).name = QuickMenu.bl_idname
+            from_quickmenu = False # Restore default state
+        else:
+            pie.separator()
+        
+        box = pie.box()
+        box.label(text="Object",icon="OBJECT_DATA")
+        box.prop(obj, "display_type")
+        box.prop(obj, "color")
+        box.prop(obj, "show_name")
+        box.prop(obj, "show_in_front")
+        box.prop(obj, "show_axes")
+        box.prop(obj, "show_wire")
+
 
 def register():
     bpy.types.VIEW3D_MT_edit_mesh_merge.append(menu_merge)
