@@ -74,7 +74,7 @@ class ViewportDisplay(bpy.types.Menu):
         box.prop(obj, "color")
         box.prop(obj, "show_name")
         box.prop(obj, "show_in_front")
-        box.prop(obj, "show_axes")
+        box.prop(obj, "show_axis")
         box.prop(obj, "show_wire")
 
         if obj.type == "ARMATURE":
