@@ -17,7 +17,14 @@ def menu_uv(self, context):
         op = layout.operator("mesh.edges_select_sharp",text=f'{angle}°',icon="IPO_CONSTANT")
         op.sharpness = radians(angle-1)
 
+def draw_return_button(pie):
+    global from_quickmenu
+    if from_quickmenu:
         pie.operator("wm.call_menu_pie", text=QuickMenu.bl_label, icon="EVENT_RETURN").name = QuickMenu.bl_idname
+        from_quickmenu = False # Restore default state
+    else:
+        pie.separator()
+
 class QuickMenu(bpy.types.Menu):
     bl_label = "Quick Menu"
     bl_idname = "VIEW3D_MT_joat_quickmenu"
@@ -30,23 +37,20 @@ class QuickMenu(bpy.types.Menu):
         box.prop(obj, "name")
         global from_quickmenu
         from_quickmenu = True
-        layout.operator("wm.call_menu_pie", text=ViewportDisplay.bl_label, icon="OVERLAY").name = ViewportDisplay.bl_idname
-        layout.operator(AddColorAttribute.bl_idname)
+        layout.operator("wm.call_menu_pie", text=ViewportDisplay.bl_label, icon=ViewportDisplay.bl_icon).name = ViewportDisplay.bl_idname
+        layout.operator("wm.call_menu_pie", text=RigifyShortcuts.bl_label, icon=RigifyShortcuts.bl_icon).name = RigifyShortcuts.bl_idname
+        # layout.operator(AddColorAttribute.bl_idname)
 
 class ViewportDisplay(bpy.types.Menu):
     bl_label = "Viewport Display"
     bl_idname = "VIEW3D_MT_joat_display"
+    bl_icon = "OVERLAY"
 
     def draw(self, context):
         pie = self.layout.menu_pie()
         obj = context.object
         # Return option
-        global from_quickmenu
-        if from_quickmenu:
-            pie.operator("wm.call_menu_pie", text=QuickMenu.bl_label, icon="EVENT_RETURN").name = QuickMenu.bl_idname
-            from_quickmenu = False # Restore default state
-        else:
-            pie.separator()
+        draw_return_button(pie)
         
         box = pie.box()
         box.label(text="Object",icon="OBJECT_DATA")
@@ -76,15 +80,20 @@ class ViewportDisplay(bpy.types.Menu):
 class ViewportOverlay(bpy.types.Menu):
     bl_idname = "VIEW3D_MT_joat_viewport_overlay"
     bl_label = "Viewport Overlays"
+    bl_icon = "OVERLAY"
 
     def draw(self, context):
-        layout = self.layout.menu_pie()
-        global from_quickmenu
-        if from_quickmenu:
-            layout.operator("wm.call_menu_pie").name = QuickMenu.bl_idname
-        else:
-            layout.separator()
-        
+        pie = self.layout.menu_pie()
+        draw_return_button(pie)
+
+class RigifyShortcuts(bpy.types.Menu):
+    bl_idname = "VIEW3D_MT_joat_rigify"
+    bl_label = "Rigify Shortcuts"
+    bl_icon = "OUTLINER_OB_ARMATURE"
+
+    def draw(self, context):
+        pie = self.layout.menu_pie()
+        draw_return_button(pie)
 
 def register():
     bpy.types.VIEW3D_MT_edit_mesh_merge.append(menu_merge)
