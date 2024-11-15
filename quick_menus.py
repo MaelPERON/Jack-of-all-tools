@@ -17,6 +17,7 @@ def menu_uv(self, context):
         op = layout.operator("mesh.edges_select_sharp",text=f'{angle}°',icon="IPO_CONSTANT")
         op.sharpness = radians(angle-1)
 
+        pie.operator("wm.call_menu_pie", text=QuickMenu.bl_label, icon="EVENT_RETURN").name = QuickMenu.bl_idname
 class QuickMenu(bpy.types.Menu):
     bl_label = "Quick Menu"
     bl_idname = "VIEW3D_MT_joat_quickmenu"
