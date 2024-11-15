@@ -3,8 +3,6 @@ from math import radians
 from .operators import AddColorAttribute, EditMetarig
 from .utils import getIndex
 
-from_quickmenu = False
-
 def menu_merge(self, context):
     layout = self.layout
     layout.separator()
@@ -32,12 +30,7 @@ def draw_props(layout, data, props):
         layout.prop(**args)
 
 def draw_return_button(pie, menu):
-    global from_quickmenu
-    if from_quickmenu:
-        pie.operator("wm.call_menu_pie", text=menu.bl_label, icon="EVENT_RETURN").name = menu.bl_idname
-        from_quickmenu = False # Restore default state
-    else:
-        pie.separator()
+    pie.operator("wm.call_menu_pie", text=menu.bl_label, icon="EVENT_RETURN").name = menu.bl_idname
 
 def draw_subpie_menu(layout, menu):
     layout.operator("wm.call_menu_pie", text=menu.bl_label, icon=menu.bl_icon).name = menu.bl_idname
@@ -52,8 +45,6 @@ class QuickMenu(bpy.types.Menu):
         box = layout.box()
         box.label(text="Main Shortcuts",icon="SCRIPTPLUGINS")
         box.prop(obj, "name")
-        global from_quickmenu
-        from_quickmenu = True
         draw_subpie_menu(layout, ViewportDisplay)
         draw_subpie_menu(layout, RigifyShortcuts)
 
