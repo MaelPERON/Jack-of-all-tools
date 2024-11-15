@@ -1,6 +1,6 @@
 import bpy
 from math import radians
-from .operators import AddColorAttribute
+from .operators import AddColorAttribute, EditMetarig
 
 from_quickmenu = False
 
