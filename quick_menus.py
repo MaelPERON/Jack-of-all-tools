@@ -24,12 +24,14 @@ class QuickMenu(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout.menu_pie()
         obj = context.object
-        layout.label(text="Hello World")
-        layout.prop(obj, "name")
+        box = layout.box()
+        box.label(text="")
+        box.prop(obj, "name")
         global from_quickmenu
         from_quickmenu = True
-        layout.operator("wm.call_menu_pie", text=ViewportDisplay.bl_label).name = ViewportDisplay.bl_idname
-        
+        layout.operator("wm.call_menu_pie", text=ViewportDisplay.bl_label, icon="OVERLAY").name = ViewportDisplay.bl_idname
+        layout.operator(AddColorAttribute.bl_idname)
+
 class ViewportDisplay(bpy.types.Menu):
     bl_label = "Viewport Display"
     bl_idname = "VIEW3D_MT_joat_display"
@@ -40,7 +42,7 @@ class ViewportDisplay(bpy.types.Menu):
         # Return option
         global from_quickmenu
         if from_quickmenu:
-            pie.operator("wm.call_menu_pie", text=QuickMenu.bl_label).name = QuickMenu.bl_idname
+            pie.operator("wm.call_menu_pie", text=QuickMenu.bl_label, icon="EVENT_RETURN").name = QuickMenu.bl_idname
             from_quickmenu = False # Restore default state
         else:
             pie.separator()
