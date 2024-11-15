@@ -39,6 +39,9 @@ def draw_return_button(pie, menu):
     else:
         pie.separator()
 
+def draw_subpie_menu(layout, menu):
+    layout.operator("wm.call_menu_pie", text=menu.bl_label, icon=menu.bl_icon).name = menu.bl_idname
+
 class QuickMenu(bpy.types.Menu):
     bl_label = "Quick Menu"
     bl_idname = "VIEW3D_MT_joat_quickmenu"
@@ -51,9 +54,8 @@ class QuickMenu(bpy.types.Menu):
         box.prop(obj, "name")
         global from_quickmenu
         from_quickmenu = True
-        layout.operator("wm.call_menu_pie", text=ViewportDisplay.bl_label, icon=ViewportDisplay.bl_icon).name = ViewportDisplay.bl_idname
-        layout.operator("wm.call_menu_pie", text=RigifyShortcuts.bl_label, icon=RigifyShortcuts.bl_icon).name = RigifyShortcuts.bl_idname
-        # layout.operator(AddColorAttribute.bl_idname)
+        draw_subpie_menu(layout, ViewportDisplay)
+        draw_subpie_menu(layout, RigifyShortcuts)
 
 class ViewportDisplay(bpy.types.Menu):
     bl_label = "Viewport Display"
@@ -118,7 +120,7 @@ class RigifyShortcuts(bpy.types.Menu):
     def draw(self, context):
         pie = self.layout.menu_pie()
         obj = context.object
-        draw_return_button(pie)
+        draw_return_button(pie, QuickMenu)
 
         pie.operator(EditMetarig.bl_idname, QuickMenu)
 
