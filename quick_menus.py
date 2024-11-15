@@ -30,10 +30,10 @@ def draw_props(layout, data, props):
             args["icon_only"] = showText
         layout.prop(**args)
 
-def draw_return_button(pie):
+def draw_return_button(pie, menu):
     global from_quickmenu
     if from_quickmenu:
-        pie.operator("wm.call_menu_pie", text=QuickMenu.bl_label, icon="EVENT_RETURN").name = QuickMenu.bl_idname
+        pie.operator("wm.call_menu_pie", text=menu.bl_label, icon="EVENT_RETURN").name = menu.bl_idname
         from_quickmenu = False # Restore default state
     else:
         pie.separator()
@@ -46,7 +46,7 @@ class QuickMenu(bpy.types.Menu):
         layout = self.layout.menu_pie()
         obj = context.object
         box = layout.box()
-        box.label(text="")
+        box.label(text="Main Shortcuts",icon="SCRIPTPLUGINS")
         box.prop(obj, "name")
         global from_quickmenu
         from_quickmenu = True
@@ -63,7 +63,7 @@ class ViewportDisplay(bpy.types.Menu):
         pie = self.layout.menu_pie()
         obj = context.object
         # Return option
-        draw_return_button(pie)
+        draw_return_button(pie, QuickMenu)
         
         box = pie.box()
         box.label(text="Object",icon="OBJECT_DATA")
@@ -130,6 +130,8 @@ class RigifyShortcuts(bpy.types.Menu):
     def draw(self, context):
         pie = self.layout.menu_pie()
         draw_return_button(pie)
+
+        pie.operator(EditMetarig.bl_idname, QuickMenu)
 
 def register():
     bpy.types.VIEW3D_MT_edit_mesh_merge.append(menu_merge)
