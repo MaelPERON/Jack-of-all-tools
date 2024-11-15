@@ -76,6 +76,28 @@ class ViewportDisplay(bpy.types.Menu):
                 args = { "data": arm, "property": prop, "text": ' '.join([word.capitalize() for word in prop.split("_")]) }
                 if icon: args["icon"] = icon
                 box.prop(**args)
+        else:
+            pie.separator()
+
+        box = pie.box()
+        row = box.row()
+        box = row.box()
+        box.label(text="Visibility")
+        box.prop(obj, "hide_select")
+        box.prop(obj, "hide_viewport")
+        box.prop(obj, "hide_render")
+        box.prop(obj, "is_shadow_catcher")
+        box.prop(obj, "is_holdout")
+
+        box = row.box()
+        box.label(text="Ray Visibility")
+        box.prop(obj, "visible_camera")
+        box.prop(obj, "visible_diffuse")
+        box.prop(obj, "visible_glossy")
+        box.prop(obj, "visible_transmission")
+        box.prop(obj, "visible_volume_scatter")
+        box.prop(obj, "visible_shadow")
+
 
 class ViewportOverlay(bpy.types.Menu):
     bl_idname = "VIEW3D_MT_joat_viewport_overlay"
