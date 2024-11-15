@@ -92,6 +92,8 @@ class ViewportDisplay(bpy.types.Menu):
         else:
             pie.separator()
 
+        draw_subpie_menu(pie, ObjectVisibility)
+
 class ViewportOverlay(bpy.types.Menu):
     bl_idname = "VIEW3D_MT_joat_viewport_overlay"
     bl_label = "Viewport Overlays"
@@ -110,6 +112,28 @@ class ObjectVisibility(bpy.types.Menu):
         pie = self.layout.menu_pie()
         obj = context.object
         draw_return_button(pie, ViewportDisplay)
+        box = pie.box()
+        box.label(text="Visibility")
+        props = [
+            ["hide_select", "RESTRICT_SELECT_OFF", False],
+            ["hide_viewport", "RESTRICT_VIEW_OFF", False],
+            ["hide_render", "RESTRICT_RENDER_OFF", False],
+            ["is_shadow_catcher", "INDIRECT_ONLY_ON", False],
+            ["is_holdout", "HOLDOUT_ON", False]
+        ]
+        draw_props(box, obj, props)
+
+        box = pie.box()
+        box.label(text="Ray Visibility")
+        props = [
+            ["visible_camera", None, False],
+            ["visible_diffuse", None, False],
+            ["visible_glossy", None, False],
+            ["visible_transmission", None, False],
+            ["visible_volume_scatter", None, False],
+            ["visible_shadow", None, False]
+        ]
+        draw_props(box, obj, props)
     
 
 class RigifyShortcuts(bpy.types.Menu):
