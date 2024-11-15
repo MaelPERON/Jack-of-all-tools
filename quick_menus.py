@@ -17,6 +17,19 @@ def menu_uv(self, context):
         op = layout.operator("mesh.edges_select_sharp",text=f'{angle}°',icon="IPO_CONSTANT")
         op.sharpness = radians(angle-1)
 
+def draw_props(layout, data, props):
+    for args in props:
+        prop = args[0]
+        icon = getIndex(args, 1)
+        showText = getIndex(args, 2)
+        showText = showText if showText is not None else True
+        text = ' '.join([word.capitalize() for word in prop.split("_")]) 
+        args = { "data": data, "property": prop, "text": text }
+        if icon:
+            args["icon"] = icon
+            args["icon_only"] = showText
+        layout.prop(**args)
+
 def draw_return_button(pie):
     global from_quickmenu
     if from_quickmenu:
@@ -72,32 +85,33 @@ class ViewportDisplay(bpy.types.Menu):
                 ["show_bone_custom_shapes","BONE_DATA"],
                 ["show_bone_colors","COLOR"]
             ]
-            for prop, icon in props:
-                args = { "data": arm, "property": prop, "text": ' '.join([word.capitalize() for word in prop.split("_")]) }
-                if icon: args["icon"] = icon
-                box.prop(**args)
+            draw_props(box, arm, props)
         else:
             pie.separator()
 
         box = pie.box()
         row = box.row()
         box = row.box()
+        props = [
+            ["hide_select", "RESTRICT_SELECT_OFF", False],
+            ["hide_viewport", "RESTRICT_VIEW_OFF", False],
+            ["hide_render", "RESTRICT_RENDER_OFF", False],
+            ["is_shadow_catcher", "INDIRECT_ONLY_ON", False],
+            ["is_holdout", "HOLDOUT_ON", False]
+        ]
         box.label(text="Visibility")
-        box.prop(obj, "hide_select")
-        box.prop(obj, "hide_viewport")
-        box.prop(obj, "hide_render")
-        box.prop(obj, "is_shadow_catcher")
-        box.prop(obj, "is_holdout")
+        draw_props(box, obj, props)
 
         box = row.box()
         box.label(text="Ray Visibility")
-        box.prop(obj, "visible_camera")
-        box.prop(obj, "visible_diffuse")
-        box.prop(obj, "visible_glossy")
-        box.prop(obj, "visible_transmission")
-        box.prop(obj, "visible_volume_scatter")
-        box.prop(obj, "visible_shadow")
-
+        props = [
+            ["visible_camera", None, False]
+            ["visible_diffuse", None, False]
+            ["visible_glossy", None, False]
+            ["visible_transmission", None, False]
+            ["visible_volume_scatter", None, False]
+            ["visible_shadow", None, False]
+        ]
 
 class ViewportOverlay(bpy.types.Menu):
     bl_idname = "VIEW3D_MT_joat_viewport_overlay"
