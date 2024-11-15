@@ -1,5 +1,6 @@
 import bpy
 from math import radians
+from .operators import AddColorAttribute
 
 from_quickmenu = False
 
@@ -69,6 +70,18 @@ class ViewportDisplay(bpy.types.Menu):
                 if icon: args["icon"] = icon
                 box.prop(**args)
 
+class ViewportOverlay(bpy.types.Menu):
+    bl_idname = "VIEW3D_MT_joat_viewport_overlay"
+    bl_label = "Viewport Overlays"
+
+    def draw(self, context):
+        layout = self.layout.menu_pie()
+        global from_quickmenu
+        if from_quickmenu:
+            layout.operator("wm.call_menu_pie").name = QuickMenu.bl_idname
+        else:
+            layout.separator()
+        
 
 def register():
     bpy.types.VIEW3D_MT_edit_mesh_merge.append(menu_merge)
