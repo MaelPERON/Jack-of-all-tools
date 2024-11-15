@@ -47,6 +47,7 @@ class QuickMenu(bpy.types.Menu):
         box.prop(obj, "name")
         draw_subpie_menu(layout, ViewportDisplay)
         draw_subpie_menu(layout, RigifyShortcuts)
+        draw_subpie_menu(layout, ObjectVisibility)
 
 class ViewportDisplay(bpy.types.Menu):
     bl_label = "Viewport Display"
@@ -57,17 +58,13 @@ class ViewportDisplay(bpy.types.Menu):
         pie = self.layout.menu_pie()
         obj = context.object
         # Return option
+        # WEST
         draw_return_button(pie, QuickMenu)
-        
-        box = pie.box()
-        box.label(text="Object",icon="OBJECT_DATA")
-        box.prop(obj, "display_type")
-        box.prop(obj, "color")
-        box.prop(obj, "show_name")
-        box.prop(obj, "show_in_front")
-        box.prop(obj, "show_axis")
-        box.prop(obj, "show_wire")
 
+        # EAST
+        draw_subpie_menu(pie, ObjectVisibility)
+
+        # SOUTH
         if obj.type == "ARMATURE":
             box = pie.box()
             box.label(text="Armature",icon="ARMATURE_DATA")
@@ -83,7 +80,18 @@ class ViewportDisplay(bpy.types.Menu):
         else:
             pie.separator()
 
-        draw_subpie_menu(pie, ObjectVisibility)
+        # NORTH
+        box = pie.box()
+        row = box.row()
+        col = row.column()
+        col.label(text="Object",icon="OBJECT_DATA")
+        col.prop(obj, "display_type")
+        col.prop(obj, "color")
+        col = row.column()
+        col.prop(obj, "show_name")
+        col.prop(obj, "show_in_front")
+        col.prop(obj, "show_axis")
+        col.prop(obj, "show_wire")
 
 class ViewportOverlay(bpy.types.Menu):
     bl_idname = "VIEW3D_MT_joat_viewport_overlay"
@@ -102,7 +110,7 @@ class ObjectVisibility(bpy.types.Menu):
     def draw(self, context):
         pie = self.layout.menu_pie()
         obj = context.object
-        draw_return_button(pie, ViewportDisplay)
+        draw_return_button(pie, QuickMenu)
         box = pie.box()
         box.label(text="Visibility")
         props = [
