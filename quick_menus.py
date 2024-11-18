@@ -42,6 +42,13 @@ class QuickMenu(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout.menu_pie()
         obj = context.object
+        if obj is None:
+            layout.alert = True
+            layout.separator()
+            layout.separator()
+            layout.separator()
+            layout.box().label(text="Select an object first.", icon="ERROR")
+            return
         box = layout.box()
         box.label(text="Main Shortcuts",icon="SCRIPTPLUGINS")
         box.prop(obj, "name")
