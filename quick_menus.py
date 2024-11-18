@@ -53,7 +53,7 @@ class QuickMenu(bpy.types.Menu):
         box.label(text="Main Shortcuts",icon="SCRIPTPLUGINS")
         box.prop(obj, "name")
         draw_subpie_menu(layout, ViewportDisplay)
-        draw_subpie_menu(layout, RigifyShortcuts)
+        draw_subpie_menu(layout, RigShortcuts)
         draw_subpie_menu(layout, ObjectVisibility)
 
 class ViewportDisplay(bpy.types.Menu):
@@ -142,9 +142,9 @@ class ObjectVisibility(bpy.types.Menu):
         draw_props(box, obj, props)
     
 
-class RigifyShortcuts(bpy.types.Menu):
+class RigShortcuts(bpy.types.Menu):
     bl_idname = "VIEW3D_MT_joat_rigify"
-    bl_label = "Rigify Shortcuts"
+    bl_label = "Rig Shortcuts"
     bl_icon = "OUTLINER_OB_ARMATURE"
 
     def draw(self, context):
