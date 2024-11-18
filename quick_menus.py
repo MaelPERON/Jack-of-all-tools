@@ -152,7 +152,7 @@ class RigShortcuts(bpy.types.Menu):
         obj = context.object
         draw_return_button(pie, QuickMenu)
 
-        pie.operator(EditMetarig.bl_idname, QuickMenu)
+        pie.operator(EditMetarig.bl_idname, text=EditMetarig.bl_label)
 
 def register():
     bpy.types.VIEW3D_MT_edit_mesh_merge.append(menu_merge)

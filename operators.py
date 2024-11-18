@@ -100,3 +100,41 @@ class AddColorAttribute(bpy.types.Operator):
     def invoke(self, context, event):
         self.objs = selectedMeshObjects(context)
         return context.window_manager.invoke_props_dialog(self)
+    
+class EditMetarig(bpy.types.Operator):
+    bl_idname = "armature.get_metarig"
+    bl_label = "Edit Metarig"
+
+    hide_rig: bpy.props.BoolProperty(name="Hide rig",description="If enabled, hide the rig after selecting metarig",default=True)
+    enter_edit_mode : bpy.props.BoolProperty(name="Enter Edit Mode",description="When enabled, enter edit mode",default=True)
+
+    @classmethod
+    def poll(self, context):
+        obj = context.object
+        return obj.type == "ARMATURE"
+    
+    def execute(self, context):
+        obj = context.object
+        metarig = None
+        rig = getattr(obj.data, "rigify_target_rig")
+        if rig: # The attribute exists, it returns the rig
+            metarig = obj
+        else: # It doesnt exist. Need to fetch the metarig. 
+            rig = obj
+            armatures = [obj for obj in context.scene.objects if obj.type == "ARMATURE"]
+            for armature in armatures:
+                target_rig = getattr(armature.data, "rigify_target_rig", None)
+                if target_rig:
+                    if target_rig.name == rig.name:
+                        metarig = armature
+                        pass
+            if metarig is None:
+                self.report({"ERROR"}, "No (meta)rig found.")
+                return {"CANCELLED"}
+
+        bpy.ops.object.mode_set(mode="OBJECT")
+        bpy.ops.object.select_all(action="DESELECT")
+        metarig.hide_viewport = False # Un-hiding the metarig
+        metarig.select_set(True)
+        bpy.ops.object.mode_set(mode="EDIT")
+        return {"FINISHED"}
