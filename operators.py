@@ -163,6 +163,8 @@ class SummonBone(bpy.types.Operator):
     bl_label = "Summon Bone"
     bl_options = {"REGISTER","UNDO"}
 
+    bone_name: bpy.props.StringProperty(name="Bone Name",default="Bone")
+
     @classmethod
     def poll(self, context):
         return True
