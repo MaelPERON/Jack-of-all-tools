@@ -100,6 +100,23 @@ class AddColorAttribute(bpy.types.Operator):
     def invoke(self, context, event):
         self.objs = selectedMeshObjects(context)
         return context.window_manager.invoke_props_dialog(self)
+
+class GenerateRig(bpy.types.Operator):
+    bl_idname = "armature.regerenate_rig"
+    bl_label = "(Re)generate rig"
+    bl_options = {"REGISTER", "UNDO"}
+
+    hide_metarig: bpy.props.BoolProperty(name="Hide Metarig",default=True)
+
+    @classmethod
+    def poll(self, context):
+        return context.preferences.addons.get("rigify")
+
+    def execute(self, context):
+        obj = context.object
+        bpy.ops.pose.rigify_generate()
+        obj.hide_set(self.hide_metarig)
+        return {"FINISHED"}
     
 class EditMetarig(bpy.types.Operator):
     bl_idname = "armature.get_metarig"
