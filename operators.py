@@ -1,6 +1,7 @@
 import bpy, bmesh
 import mathutils
 from random import random
+from .utils import isMetarig
 
 def selectedMeshObjects(context):
     return [obj for obj in context.selected_objects if obj.type == "MESH"]
@@ -110,7 +111,8 @@ class GenerateRig(bpy.types.Operator):
 
     @classmethod
     def poll(self, context):
-        return context.preferences.addons.get("rigify")
+        if not context.preferences.addons.get("rigify"): return False
+        return isMetarig(context.object)
 
     def execute(self, context):
         obj = context.object
