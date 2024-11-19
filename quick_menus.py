@@ -1,6 +1,7 @@
 import bpy
 from math import radians
 from .operators import AddColorAttribute, EditMetarig
+from .operators import AddColorAttribute, EditMetarig, GenerateRig
 from .utils import getIndex
 
 def menu_merge(self, context):
@@ -153,6 +154,9 @@ class RigShortcuts(bpy.types.Menu):
         draw_return_button(pie, QuickMenu)
 
         pie.operator(EditMetarig.bl_idname, text=EditMetarig.bl_label)
+        if context.preferences.addons.get("rigify"):
+            pie.operator_context = "INVOKE_DEFAULT"
+            pie.operator(GenerateRig.bl_idname,text=GenerateRig.bl_label,icon="ARMATURE_DATA")
 
 def register():
     bpy.types.VIEW3D_MT_edit_mesh_merge.append(menu_merge)
