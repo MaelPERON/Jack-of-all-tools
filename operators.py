@@ -185,14 +185,18 @@ class SummonBone(bpy.types.Operator):
         selected_objs = context.selected_objects
 
         # Retrieving the coordinates for the bone's tail and head
+        def true_coordinates(co):
+            co = obj.matrix_world @ co
+            return mathutils.Vector((a-armature.location[i] for i, a in enumerate(co)))
+
         with bpy.context.temp_override(selected_objects=obj):
             bpy.ops.object.mode_set(mode="EDIT")
             mesh = bmesh.from_edit_mesh(obj.data)
             verts = [elem for elem in mesh.select_history if isinstance(elem, bmesh.types.BMVert)]
             if len(verts) < 2:
                 return self.report({"ERROR"}, f"Please, select at least two vertices.")
-            coordinates = [p.co for p in verts[-2:]]
-        
+            coordinates = [true_coordinates(p.co) for p in verts[-2:]]
+
         # Creating and positioning the new bone
             # Editing selected armature
         bpy.ops.object.mode_set(mode="OBJECT")
