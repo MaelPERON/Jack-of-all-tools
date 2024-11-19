@@ -1,4 +1,4 @@
-import bpy
+import bpy, bmesh
 import mathutils
 from random import random
 
@@ -156,4 +156,56 @@ class EditMetarig(bpy.types.Operator):
         rig.hide_set(True)
         metarig.select_set(True)
         bpy.ops.object.mode_set(mode="EDIT")
+        return {"FINISHED"}
+    
+class SummonBone(bpy.types.Operator):
+    bl_idname = "armature.summon_bone"
+    bl_label = "Summon Bone"
+    bl_options = {"REGISTER","UNDO"}
+
+    @classmethod
+    def poll(self, context):
+        return True
+    
+    def execute(self, context):
+        armatures = [arm for arm in context.selected_objects if arm.type == "ARMATURE"]
+        if context.object is not None and context.object.type != "MESH":
+            self.report({"ERROR_INVALID_CONTEXT"}, "No active mesh object found. Please, select one.")
+            return {"CANCELLED"}
+        if len(armatures) != 1:
+            self.report({"ERROR_INVALID_INPUT"}, "Please, select only ONE armature object.")
+            return {"CANCELLED"}
+        
+        armature = armatures[0]
+        obj = context.object
+        selected_objs = context.selected_objects
+
+        # Retrieving the coordinates for the bone's tail and head
+        with bpy.context.temp_override(selected_objects=obj):
+            bpy.ops.object.mode_set(mode="EDIT")
+            mesh = bmesh.from_edit_mesh(obj.data)
+            verts = [elem for elem in mesh.select_history if isinstance(elem, bmesh.types.BMVert)]
+            if len(verts) < 2:
+                return self.report({"ERROR"}, f"Please, select at least two vertices.")
+            coordinates = [p.co for p in verts[-2:]]
+        
+        # Creating and positioning the new bone
+            # Editing selected armature
+        bpy.ops.object.mode_set(mode="OBJECT")
+        bpy.ops.object.select_all(action="DESELECT")
+        context.view_layer.objects.active = armature
+        armature.select_set(True)
+        bpy.ops.object.mode_set(mode="EDIT")
+            # Adding the bone
+        edit_bones = armature.data.edit_bones
+        bone = edit_bones.new(self.bone_name)
+        bone.head = coordinates[0]
+        bone.tail = coordinates[1]
+
+        # Restoring selection and mode context
+        bpy.ops.object.mode_set(mode="OBJECT")
+        for o in selected_objs: o.select_set(True)
+        context.view_layer.objects.active = obj
+        bpy.ops.object.mode_set(mode="EDIT")
+
         return {"FINISHED"}
