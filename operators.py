@@ -132,9 +132,11 @@ class EditMetarig(bpy.types.Operator):
                 self.report({"ERROR"}, "No (meta)rig found.")
                 return {"CANCELLED"}
 
+        metarig.hide_set(False) # Un-hiding the metarig
         bpy.ops.object.mode_set(mode="OBJECT")
         bpy.ops.object.select_all(action="DESELECT")
-        metarig.hide_viewport = False # Un-hiding the metarig
+        context.view_layer.objects.active = metarig
+        rig.hide_set(True)
         metarig.select_set(True)
         bpy.ops.object.mode_set(mode="EDIT")
         return {"FINISHED"}
