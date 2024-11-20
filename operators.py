@@ -217,31 +217,67 @@ class SummonBone(bpy.types.Operator):
         bpy.ops.object.mode_set(mode="EDIT")
 
         return {"FINISHED"}
-    
+
+class ModifierPropertyGroup(bpy.types.PropertyGroup):
+    name: bpy.props.StringProperty()
+    identifier: bpy.props.StringProperty()
+    value: bpy.props.BoolProperty()
 
 class SelectObjectWithModifiers(bpy.types.Operator):
     bl_idname = "object.select_with_modifier"
     bl_label = "Select Object With Modifiers"
     bl_options = {"REGISTER","UNDO"}
+    main = ["SUBSURF", "MIRROR", "BEVEL", "SOLIDIFY", "ARRAY"]
 
-    subsurf : bpy.props.BoolProperty(name="Ignore Subdivision Surface",default=False)
-    mirror : bpy.props.BoolProperty(name="Ignore Mirror",default=False)
-    bevel : bpy.props.BoolProperty(name="Ignore Bevel",default=False)
-    solidify : bpy.props.BoolProperty(name="Ignore Solidify",default=False)
-    array : bpy.props.BoolProperty(name="Ignore Array",default=False)
+
+    modifiers : bpy.props.CollectionProperty(type=ModifierPropertyGroup)
+    mode : bpy.props.EnumProperty(items=[
+        ("exclusive","Exclusive","Ignore selected modifiers"),
+        ("inclusive","Inclusive","Ignore non-selected modifiers")
+    ],name="Selection Mode")
+    show_only_main : bpy.props.BoolProperty(name="Filter Important Modifiers",description="Show most frequent modifiers. Hide and disable the rest.")
 
     @classmethod
     def poll(self, context):
         return context.mode == "OBJECT"
-    
+
+    def invoke(self, context, event):
+        all_modifiers = [mod for mod in bpy.types.Modifier.bl_rna.properties["type"].enum_items if mod.identifier.startswith("GREASE") != True]
+        all_modifiers.sort(key=lambda o: o.identifier)
+        main_modifiers = [mod for mod in all_modifiers if mod.identifier.lower() in self.main]
+        for modifier in all_modifiers:
+            prop = self.modifiers.add()
+            prop.name = modifier.name
+            prop.identifier = modifier.identifier
+            prop.value = False
+        
+        return self.execute(context)
+
+    def draw(self, context):
+        layout = self.layout
+        row = layout.row()
+        icon = "SELECT_" + ("INTERSECT" if self.mode == "inclusive" else "DIFFERENCE") # Change icon to show selection type
+        row.prop(self, "mode", icon=icon)
+
+        icon = "SOLO_" + ("ON" if (only_main := getattr(self, "show_only_main")) else "OFF") # Change icon depending on attribute (ON/OFF)
+        row.prop(self, "show_only_main", icon=icon)
+        row = layout.row()
+        col = None
+        for i, item in enumerate([mod for mod in self.modifiers if (mod.identifier in self.main) or not only_main]): # List all modifiers, and filter if needed (only_main)
+            if i%20 == 0:
+                col = row.column()
+            col.box().prop(item, "value", text=item.name)
+
     def execute(self, context):
         selected_objects = context.selected_objects
-        sorting_modifiers = [mod for mod in ["subsurf", "mirror", "bevel", "solidify", "array"] if getattr(self, mod)]
+        mode = self.mode == "inclusive"
+        sorting_modifiers = [item.identifier for item in self.modifiers if (item.value) or (self.show_only_main and item.identifier in self.main)] # List all checked modifiers, remove everyone except frequent one if needed (only_main)
+        print(sorting_modifiers)
         bpy.ops.object.select_all(action="DESELECT")
         for obj in context.view_layer.objects:
             if obj.type == "MESH":
                 for modifier in obj.modifiers:
-                    if not modifier.type.lower() in sorting_modifiers:
+                    if (modifier.type in sorting_modifiers) == mode:
                         obj.select_set(True)
 
         return {"FINISHED"}
