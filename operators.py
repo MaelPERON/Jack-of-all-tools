@@ -232,7 +232,7 @@ class SelectObjectWithModifiers(bpy.types.Operator):
 
     @classmethod
     def poll(self, context):
-        return True
+        return context.mode == "OBJECT"
     
     def execute(self, context):
         selected_objects = context.selected_objects
