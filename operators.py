@@ -245,6 +245,7 @@ class SelectObjectWithModifiers(bpy.types.Operator):
         all_modifiers = [mod for mod in bpy.types.Modifier.bl_rna.properties["type"].enum_items if mod.identifier.startswith("GREASE") != True]
         all_modifiers.sort(key=lambda o: o.identifier)
         main_modifiers = [mod for mod in all_modifiers if mod.identifier.lower() in self.main]
+        self.modifiers.clear()
         for modifier in all_modifiers:
             prop = self.modifiers.add()
             prop.name = modifier.name
