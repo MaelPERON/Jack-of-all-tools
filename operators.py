@@ -256,7 +256,7 @@ class SelectObjectWithModifiers(bpy.types.Operator):
     def draw(self, context):
         layout = self.layout
         row = layout.row()
-        icon = "SELECT_" + ("INTERSECT" if self.mode == "inclusive" else "DIFFERENCE") # Change icon to show selection type
+        icon = "SELECT_" + ("EXTEND" if self.mode == "inclusive" else "SUBTRACT") # Change icon to show selection type
         row.prop(self, "mode", icon=icon)
 
         icon = "SOLO_" + ("ON" if (only_main := getattr(self, "show_only_main")) else "OFF") # Change icon depending on attribute (ON/OFF)
