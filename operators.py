@@ -234,7 +234,7 @@ class SelectObjectWithModifiers(bpy.types.Operator):
     mode : bpy.props.EnumProperty(items=[
         ("exclusive","Exclusive","Ignore selected modifiers"),
         ("inclusive","Inclusive","Ignore non-selected modifiers")
-    ],name="Selection Mode")
+    ],name="Selection Mode",default="exclusive")
     show_only_main : bpy.props.BoolProperty(name="Filter Important Modifiers",description="Show most frequent modifiers. Hide and disable the rest.")
 
     @classmethod
@@ -256,18 +256,22 @@ class SelectObjectWithModifiers(bpy.types.Operator):
 
     def draw(self, context):
         layout = self.layout
-        row = layout.row()
-        icon = "SELECT_" + ("EXTEND" if self.mode == "inclusive" else "SUBTRACT") # Change icon to show selection type
-        row.prop(self, "mode", icon=icon)
 
-        icon = "SOLO_" + ("ON" if (only_main := getattr(self, "show_only_main")) else "OFF") # Change icon depending on attribute (ON/OFF)
-        row.prop(self, "show_only_main", icon=icon)
+        # Modifiers
         row = layout.row()
         col = None
         for i, item in enumerate([mod for mod in self.modifiers if (mod.identifier in self.main) or not only_main]): # List all modifiers, and filter if needed (only_main)
             if i%20 == 0:
                 col = row.column()
             col.box().prop(item, "value", text=item.name)
+
+        # Operator behavior
+        row = layout.row()
+        icon = "SELECT_" + ("EXTEND" if self.mode == "inclusive" else "SUBTRACT") # Change icon to show selection type
+        row.prop(self, "mode", icon=icon)
+
+        icon = "SOLO_" + ("ON" if (only_main := getattr(self, "show_only_main")) else "OFF") # Change icon depending on attribute (ON/OFF)
+        row.prop(self, "show_only_main", icon=icon)
 
     def execute(self, context):
         selected_objects = context.selected_objects
