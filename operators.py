@@ -271,7 +271,7 @@ class SelectObjectWithModifiers(bpy.types.Operator):
     def execute(self, context):
         selected_objects = context.selected_objects
         mode = self.mode == "inclusive"
-        sorting_modifiers = [item.identifier for item in self.modifiers if (item.value) or (self.show_only_main and item.identifier in self.main)] # List all checked modifiers, remove everyone except frequent one if needed (only_main)
+        sorting_modifiers = [item.identifier for item in self.modifiers if (item.value if not self.show_only_main else item.value and (item.identifier in self.main))] # List all checked modifiers, remove everyone except frequent one if needed (only_main)
         print(sorting_modifiers)
         bpy.ops.object.select_all(action="DESELECT")
         for obj in context.view_layer.objects:
