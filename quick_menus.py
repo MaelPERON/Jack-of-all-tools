@@ -1,6 +1,5 @@
 import bpy
 from math import radians
-from .operators import AddColorAttribute, EditMetarig
 from .operators import AddColorAttribute, EditMetarig, GenerateRig
 from .utils import getIndex, placeOperator
 
