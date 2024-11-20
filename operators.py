@@ -217,3 +217,31 @@ class SummonBone(bpy.types.Operator):
         bpy.ops.object.mode_set(mode="EDIT")
 
         return {"FINISHED"}
+    
+
+class SelectObjectWithModifiers(bpy.types.Operator):
+    bl_idname = "object.select_with_modifier"
+    bl_label = "Select Object With Modifiers"
+    bl_options = {"REGISTER","UNDO"}
+
+    subsurf : bpy.props.BoolProperty(name="Ignore Subdivision Surface",default=False)
+    mirror : bpy.props.BoolProperty(name="Ignore Mirror",default=False)
+    bevel : bpy.props.BoolProperty(name="Ignore Bevel",default=False)
+    solidify : bpy.props.BoolProperty(name="Ignore Solidify",default=False)
+    array : bpy.props.BoolProperty(name="Ignore Array",default=False)
+
+    @classmethod
+    def poll(self, context):
+        return True
+    
+    def execute(self, context):
+        selected_objects = context.selected_objects
+        sorting_modifiers = [mod for mod in ["subsurf", "mirror", "bevel", "solidify", "array"] if getattr(self, mod)]
+        bpy.ops.object.select_all(action="DESELECT")
+        for obj in context.view_layer.objects:
+            if obj.type == "MESH":
+                for modifier in obj.modifiers:
+                    if not modifier.type.lower() in sorting_modifiers:
+                        obj.select_set(True)
+
+        return {"FINISHED"}
