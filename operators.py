@@ -313,10 +313,10 @@ class SaveCompositorPreview(bpy.types.Operator):
                 input = input[0]
                 if input.is_linked:
                     previous_node = input.links[0].from_node
-                    if previous_node.bl_idname == 'CompositorNodeImage':
+                    if previous_node.bl_idname == 'CompositorNodeImage' and previous_node.label == "":
                         name = previous_node.image.name_full
                     else:
-                        previous_node.label
+                        name = previous_node.label
 
         if name == "": return "undefined"
         name += '.' + context.scene.render.image_settings.file_format.lower()
