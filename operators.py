@@ -299,7 +299,7 @@ class SaveCompositorPreview(bpy.types.Operator):
 
     @classmethod
     def poll(self, context):
-        return True
+        return context.area.type == "NODE_EDITOR" and context.space_data.node_tree is not None
     
     def draw(self, context):
         layout = self.layout
