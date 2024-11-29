@@ -322,4 +322,15 @@ class SaveCompositorPreview(bpy.types.Operator):
         return context.window_manager.invoke_props_dialog(self)
 
     def execute(self, context):
+        # Get 'Viewer Node' image
+        from os.path import join
+        image = [image for image in bpy.data.images if image.source == "VIEWER" and len(image.render_slots) == 0][0]
+        
+        # Set filepath with filename pickup from the custom properties
+        filename = self.get_filename(context)
+        filepath = join(self.filepath, filename)
+
+        # In the end, save the image
+        image.save_render(filepath=filepath)
+        self.report({"INFO"}, f"Saved image {filepath}")
         return {"FINISHED"}
