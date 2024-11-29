@@ -301,6 +301,28 @@ class SaveCompositorPreview(bpy.types.Operator):
     def poll(self, context):
         return context.area.type == "NODE_EDITOR" and context.space_data.node_tree is not None
     
+    def get_filename(self, context):
+        prefix = getattr(self, 'prefix', '')
+        suffix = getattr(self, "suffix", '')
+        name = getattr(self, "name")
+        if getattr(self, "node_name", False):
+            node_tree = context.space_data.node_tree
+            preview_nodes = [node for node in node_tree.nodes if node.bl_idname == "CompositorNodeViewer"]
+            node = preview_nodes[0] # Cannot check which preview node is the "enabled" one. Getting the first one.
+            if input := node.inputs:
+                input = input[0]
+                if input.is_linked:
+                    previous_node = input.links[0].from_node
+                    if previous_node.bl_idname == 'CompositorNodeImage':
+                        name = previous_node.image.name_full
+                    else:
+                        previous_node.label
+
+        if name == "": return "undefined"
+        name += '.' + context.scene.render.image_settings.file_format.lower()
+
+        return '-'.join([part for part in [prefix, name, suffix] if part != ''])
+
     def draw(self, context):
         layout = self.layout
 
@@ -316,7 +338,7 @@ class SaveCompositorPreview(bpy.types.Operator):
         display_name = '-'.join([attr for prop in ["prefix","name","suffix"] if (attr := getattr(self, prop, '')) != ''])
         layout.separator()
         layout.prop(self, "node_name")
-        layout.label(text=display_name + '.' + context.scene.render.image_settings.file_format, icon="IMAGE_DATA")
+        layout.label(text=self.get_filename(context), icon="IMAGE_DATA")
 
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
