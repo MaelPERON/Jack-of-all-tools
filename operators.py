@@ -1,7 +1,7 @@
 import bpy, bmesh
 import mathutils
 from random import random
-from .utils import isMetarig
+from .utils import isMetarig, incrementString
 
 def selectedMeshObjects(context):
     return [obj for obj in context.selected_objects if obj.type == "MESH"]
@@ -355,4 +355,9 @@ class SaveCompositorPreview(bpy.types.Operator):
         # In the end, save the image
         image.save_render(filepath=filepath)
         self.report({"INFO"}, f"Saved image {filepath}")
+
+        # Incrementing prefix and suffix if numbers are found
+        self.prefix = incrementString(self.prefix)
+        self.suffix = incrementString(self.suffix)
+        
         return {"FINISHED"}
