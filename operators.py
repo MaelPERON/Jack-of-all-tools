@@ -319,9 +319,8 @@ class SaveCompositorPreview(bpy.types.Operator):
                         name = previous_node.label
 
         if name == "": return "undefined"
-        name += '.' + context.scene.render.image_settings.file_format.lower()
 
-        return '-'.join([part for part in [prefix, name, suffix] if part != ''])
+        return '-'.join([part for part in [prefix, name, suffix] if part != '']) + '.' + context.scene.render.image_settings.file_format.lower()
 
     def draw(self, context):
         layout = self.layout
