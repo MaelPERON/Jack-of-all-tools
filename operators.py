@@ -291,6 +291,12 @@ class SaveCompositorPreview(bpy.types.Operator):
     bl_idname = "node.save_preview"
     bl_label = "Save Preview"
 
+    filepath: bpy.props.StringProperty(name="Filepath",description="Where to save the image", subtype="FILE_PATH",default="C:/tmp/")
+    prefix: bpy.props.StringProperty(name="Prefix",description="Set description. Numbers will be automatically incremented every call of the operator",default="")
+    suffix: bpy.props.StringProperty(name="Suffix",description="Set description. Numbers will be automatically incremented every call of the operator",default="")
+    name: bpy.props.StringProperty(name="Image Name",default="Foobar")
+    node_name: bpy.props.BoolProperty(name="Replace with node label",description="Image name will be replaced by the node label connected to \"Viewer\" node.")
+
     @classmethod
     def poll(self, context):
         return True
