@@ -301,5 +301,25 @@ class SaveCompositorPreview(bpy.types.Operator):
     def poll(self, context):
         return True
     
+    def draw(self, context):
+        layout = self.layout
+
+        layout.prop(self, "filepath")
+        layout.separator()
+        row = layout.row(heading="Filename")
+        row.prop(self, "prefix",placeholder="Prefix", text="")
+        if getattr(self, "node_name", False):
+            row.label(text="<Node Name>")
+        else:
+            row.prop(self, "name",placeholder="Name",text="")
+        row.prop(self, "suffix",placeholder="Suffix", text="")
+        display_name = '-'.join([attr for prop in ["prefix","name","suffix"] if (attr := getattr(self, prop, '')) != ''])
+        layout.separator()
+        layout.prop(self, "node_name")
+        layout.label(text=display_name + '.' + context.scene.render.image_settings.file_format, icon="IMAGE_DATA")
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+
     def execute(self, context):
         return {"FINISHED"}
