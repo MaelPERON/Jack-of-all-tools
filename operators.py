@@ -260,7 +260,7 @@ class SelectObjectWithModifiers(bpy.types.Operator):
         # Modifiers
         row = layout.row()
         col = None
-        for i, item in enumerate([mod for mod in self.modifiers if (mod.identifier in self.main) or not only_main]): # List all modifiers, and filter if needed (only_main)
+        for i, item in enumerate([mod for mod in self.modifiers if (mod.identifier in self.main) or not self.show_only_main]): # List all modifiers, and filter if needed (only_main)
             if i%20 == 0:
                 col = row.column()
             col.box().prop(item, "value", text=item.name)
