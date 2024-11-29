@@ -16,3 +16,13 @@ def isMetarig(obj):
         if b.rigify_type != "":
             return True
     return False
+
+def incrementString(string):
+    from re import findall, compile, sub
+    if matches := findall(r"(\d{1,})", string):
+        matches = list(set(matches))
+        matches.sort(reverse=True)
+        for match in [int(match) for match in matches]:
+            string = sub(compile(f"({match})"), str(match+1), string)
+
+    return string
