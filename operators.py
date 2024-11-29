@@ -286,3 +286,14 @@ class SelectObjectWithModifiers(bpy.types.Operator):
                         obj.select_set(True)
 
         return {"FINISHED"}
+    
+class SaveCompositorPreview(bpy.types.Operator):
+    bl_idname = "node.save_preview"
+    bl_label = "Save Preview"
+
+    @classmethod
+    def poll(self, context):
+        return True
+    
+    def execute(self, context):
+        return {"FINISHED"}
