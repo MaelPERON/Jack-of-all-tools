@@ -1,7 +1,8 @@
 import bpy, bmesh
 import mathutils
 from random import random
-from .utils import isMetarig
+from .utils import isMetarig, incrementString
+from .modules.compositing import set_light_group
 
 def selectedMeshObjects(context):
     return [obj for obj in context.selected_objects if obj.type == "MESH"]
@@ -285,4 +286,168 @@ class SelectObjectWithModifiers(bpy.types.Operator):
                     if (modifier.type in sorting_modifiers) == mode:
                         obj.select_set(True)
 
+        return {"FINISHED"}
+    
+class SaveCompositorPreview(bpy.types.Operator):
+    bl_idname = "node.save_preview"
+    bl_label = "Save Preview"
+
+    filepath: bpy.props.StringProperty(name="Filepath",description="Where to save the image", subtype="FILE_PATH",default="C:/tmp/")
+    prefix: bpy.props.StringProperty(name="Prefix",description="Set description. Numbers will be automatically incremented every call of the operator",default="")
+    suffix: bpy.props.StringProperty(name="Suffix",description="Set description. Numbers will be automatically incremented every call of the operator",default="")
+    name: bpy.props.StringProperty(name="Image Name",default="Foobar")
+    node_name: bpy.props.BoolProperty(name="Replace with node label",description="Image name will be replaced by the node label connected to \"Viewer\" node.")
+
+    @classmethod
+    def poll(self, context):
+        return context.area.type == "NODE_EDITOR" and context.space_data.node_tree is not None
+    
+    def get_filename(self, context):
+        prefix = getattr(self, 'prefix', '')
+        suffix = getattr(self, "suffix", '')
+        name = getattr(self, "name")
+        if getattr(self, "node_name", False):
+            node_tree = context.space_data.node_tree
+            preview_nodes = [node for node in node_tree.nodes if node.bl_idname == "CompositorNodeViewer"]
+            node = preview_nodes[0] # Cannot check which preview node is the "enabled" one. Getting the first one.
+            if input := node.inputs:
+                input = input[0]
+                if input.is_linked:
+                    previous_node = input.links[0].from_node
+                    if previous_node.bl_idname == 'CompositorNodeImage' and previous_node.label == "":
+                        name = previous_node.image.name_full
+                    else:
+                        name = previous_node.label
+
+        if name == "": return "undefined"
+
+        return '-'.join([part for part in [prefix, name, suffix] if part != '']) + '.' + context.scene.render.image_settings.file_format.lower()
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.prop(self, "filepath")
+        layout.separator()
+        row = layout.row(heading="Filename")
+        row.prop(self, "prefix",placeholder="Prefix", text="")
+        if getattr(self, "node_name", False):
+            row.label(text="<Node Name>")
+        else:
+            row.prop(self, "name",placeholder="Name",text="")
+        row.prop(self, "suffix",placeholder="Suffix", text="")
+        display_name = '-'.join([attr for prop in ["prefix","name","suffix"] if (attr := getattr(self, prop, '')) != ''])
+        layout.separator()
+        layout.prop(self, "node_name")
+        layout.label(text=self.get_filename(context), icon="IMAGE_DATA")
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+
+    def execute(self, context):
+        # Get 'Viewer Node' image
+        from os.path import join
+        image = [image for image in bpy.data.images if image.source == "VIEWER" and len(image.render_slots) == 0][0]
+        
+        # Set filepath with filename pickup from the custom properties
+        filename = self.get_filename(context)
+        filepath = join(self.filepath, filename)
+
+        # In the end, save the image
+        image.save_render(filepath=filepath)
+        self.report({"INFO"}, f"Saved image {filepath}")
+
+        # Incrementing prefix and suffix if numbers are found
+        self.prefix = incrementString(self.prefix)
+        self.suffix = incrementString(self.suffix)
+        
+        return {"FINISHED"}
+    
+class LinkImageOpacity(bpy.types.Operator):
+    bl_idname = "object.link_image_opacity"
+    bl_label = "Link Image Opacity"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def get_objs(self, context):
+        return [obj for obj in context.selected_objects if (obj.type == "EMPTY" and obj.empty_display_type == "IMAGE")]
+
+    @classmethod
+    def poll(self, context):
+        return len(self.get_objs(self, context)) >= 1
+    
+    def execute(self, context):
+        images = self.get_objs(context)
+        context.window_manager.progress_begin(0, len(images))
+        for i, image in enumerate(images):
+            driver = image.driver_add("color", 3).driver
+            for var in driver.variables: driver.variables.remove(var)
+            # Variable
+            var = driver.variables.new()
+            var.name = "opacity"
+            var.type = "CONTEXT_PROP"
+            # Target
+            target = var.targets[0]
+            target.fallback_value = 1.0
+            target.data_path = "joat_reference_opacity"
+            # Driver expression
+            driver.expression = "opacity"
+            # Update progress
+            context.window_manager.progress_update(i)
+        
+        context.window_manager.progress_end()
+        self.report({"INFO"}, "Linked {0} image(s) to scene reference opacity".format(len(images)))
+        return {"FINISHED"}
+    
+class SetLightGroup(bpy.types.Operator):
+    bl_idname = "object.joat_light_group"
+    bl_label = "Set Light Group"
+
+    lightgroup: bpy.props.StringProperty(name="Light Group Name",default="Lightgroup")
+
+    @classmethod
+    def poll(self, context):
+        return True
+    
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+    
+    def execute(self, context):
+        objs = [obj for obj in context.selected_objects]
+        set_light_group(context.view_layer, objs, self.lightgroup)
+        return {"FINISHED"}
+
+class CopyLightGroup(bpy.types.Operator):
+    bl_idname = "object.joat_copy_lightgroup"
+    bl_label = "Copy Lightgroup"
+
+    @classmethod
+    def poll(self, context): return len(context.selected_objects)>1
+
+    def execute(self, context):
+        lightgroup = context.active_object.lightgroup
+        objs = context.selected_objects
+        set_light_group(context.view_layer, objs, lightgroup)
+        return {"FINISHED"}
+    
+class SelectLightGroup(bpy.types.Operator):
+    bl_idname = "object.joat_select_lightgroup"
+    bl_label = "Select Lightgroup"
+
+    @classmethod
+    def poll(self, context): return context.active_object is not None
+
+    def execute(self, context):
+        lightgroup = context.active_object.lightgroup
+        objs = [obj for obj in context.selected_objects if obj.lightgroup == lightgroup]
+        hidden_objs = []
+
+        print(obj.name for obj in objs)
+
+        bpy.ops.object.select_all(action="DESELECT")
+        for obj in objs:
+            if obj.visible_get():
+                obj.select_set(True)
+            else:
+                hidden_objs.append(obj)
+
+        if len(hidden_objs)>0: self.report({"WARN"}, "{objects} could not be selected (they're hidden)".format(objects=','.join(obj.name for obj in hidden_objs)))
         return {"FINISHED"}
