@@ -85,6 +85,28 @@ class ViewportDisplay(bpy.types.Menu):
                 ["show_bone_colors","COLOR"]
             ]
             draw_props(box, arm, props)
+        elif obj.type == "CAMERA":
+            box = pie.box()
+            box.label(text="Camera", icon="CAMERA_DATA")
+            cam = obj.data
+            row = box.row(align=True)
+            col = row.column()
+            props = [
+                ["lens",None],
+                ["lens_unit",None],
+                ["show_passepartout",None]
+            ]
+            draw_props(col, cam, props)
+            row.separator()
+            col = row.column()
+            props = [
+                ["passepartout_alpha", None],
+                ["show_limits", None],
+                ["show_mist", None],
+                ["show_sensor", None],
+                ["show_name", None]
+            ]
+            draw_props(col, cam, props)
         else:
             pie.separator()
 
