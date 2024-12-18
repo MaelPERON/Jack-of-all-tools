@@ -2,6 +2,7 @@ import bpy, bmesh
 import mathutils
 from random import random
 from .utils import isMetarig, incrementString
+from .modules.compositing import set_light_group
 
 def selectedMeshObjects(context):
     return [obj for obj in context.selected_objects if obj.type == "MESH"]
@@ -359,4 +360,59 @@ class SaveCompositorPreview(bpy.types.Operator):
         self.prefix = incrementString(self.prefix)
         self.suffix = incrementString(self.suffix)
         
+        return {"FINISHED"}
+    
+class SetLightGroup(bpy.types.Operator):
+    bl_idname = "object.joat_light_group"
+    bl_label = "Set Light Group"
+
+    lightgroup: bpy.props.StringProperty(name="Light Group Name",default="Lightgroup")
+
+    @classmethod
+    def poll(self, context):
+        return True
+    
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+    
+    def execute(self, context):
+        objs = [obj for obj in context.selected_objects]
+        set_light_group(context.view_layer, objs, self.lightgroup)
+        return {"FINISHED"}
+
+class CopyLightGroup(bpy.types.Operator):
+    bl_idname = "object.joat_copy_lightgroup"
+    bl_label = "Copy Lightgroup"
+
+    @classmethod
+    def poll(self, context): return len(context.selected_objects)>1
+
+    def execute(self, context):
+        lightgroup = context.active_object.lightgroup
+        objs = context.selected_objects
+        set_light_group(context.view_layer, objs, lightgroup)
+        return {"FINISHED"}
+    
+class SelectLightGroup(bpy.types.Operator):
+    bl_idname = "object.joat_select_lightgroup"
+    bl_label = "Select Lightgroup"
+
+    @classmethod
+    def poll(self, context): return context.active_object is not None
+
+    def execute(self, context):
+        lightgroup = context.active_object.lightgroup
+        objs = [obj for obj in context.selected_objects if obj.lightgroup == lightgroup]
+        hidden_objs = []
+
+        print(obj.name for obj in objs)
+
+        bpy.ops.object.select_all(action="DESELECT")
+        for obj in objs:
+            if obj.visible_get():
+                obj.select_set(True)
+            else:
+                hidden_objs.append(obj)
+
+        if len(hidden_objs)>0: self.report({"WARN"}, "{objects} could not be selected (they're hidden)".format(objects=','.join(obj.name for obj in hidden_objs)))
         return {"FINISHED"}
