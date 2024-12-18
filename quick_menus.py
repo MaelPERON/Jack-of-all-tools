@@ -55,6 +55,7 @@ class QuickMenu(bpy.types.Menu):
         draw_subpie_menu(layout, ViewportDisplay)
         draw_subpie_menu(layout, RigShortcuts)
         draw_subpie_menu(layout, ObjectVisibility)
+        draw_subpie_menu(layout, SceneUtility)
 
 class ViewportDisplay(bpy.types.Menu):
     bl_label = "Viewport Display"
@@ -140,7 +141,18 @@ class ObjectVisibility(bpy.types.Menu):
             ["visible_shadow", None, False]
         ]
         draw_props(box, obj, props)
-    
+
+class SceneUtility(bpy.types.Menu):
+    bl_idname = "VIEW3D_MT_joat_scene"
+    bl_label = "Scene Utility"
+    bl_icon = "SCENE_DATA"
+
+    def draw(self, context):
+        pie = self.layout.menu_pie()
+        draw_return_button(pie, QuickMenu)
+        box = pie.box()
+        box.prop(context.scene, "joat_reference_opacity")
+        pie.operator("object.link_image_opacity")
 
 class RigShortcuts(bpy.types.Menu):
     bl_idname = "VIEW3D_MT_joat_rigify"
