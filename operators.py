@@ -362,6 +362,41 @@ class SaveCompositorPreview(bpy.types.Operator):
         
         return {"FINISHED"}
     
+class LinkImageOpacity(bpy.types.Operator):
+    bl_idname = "object.link_image_opacity"
+    bl_label = "Link Image Opacity"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def get_objs(self, context):
+        return [obj for obj in context.selected_objects if (obj.type == "EMPTY" and obj.empty_display_type == "IMAGE")]
+
+    @classmethod
+    def poll(self, context):
+        return len(self.get_objs(self, context)) >= 1
+    
+    def execute(self, context):
+        images = self.get_objs(context)
+        context.window_manager.progress_begin(0, len(images))
+        for i, image in enumerate(images):
+            driver = image.driver_add("color", 3).driver
+            for var in driver.variables: driver.variables.remove(var)
+            # Variable
+            var = driver.variables.new()
+            var.name = "opacity"
+            var.type = "CONTEXT_PROP"
+            # Target
+            target = var.targets[0]
+            target.fallback_value = 1.0
+            target.data_path = "joat_reference_opacity"
+            # Driver expression
+            driver.expression = "opacity"
+            # Update progress
+            context.window_manager.progress_update(i)
+        
+        context.window_manager.progress_end()
+        self.report({"INFO"}, "Linked {0} image(s) to scene reference opacity".format(len(images)))
+        return {"FINISHED"}
+    
 class SetLightGroup(bpy.types.Operator):
     bl_idname = "object.joat_light_group"
     bl_label = "Set Light Group"
