@@ -161,6 +161,35 @@ class EditMetarig(bpy.types.Operator):
         bpy.ops.object.mode_set(mode="EDIT")
         return {"FINISHED"}
     
+class ToggleSkinMode(bpy.types.Operator):
+    bl_idname = "joat.toggle_skin_mode"
+    bl_label = "Toggle Skin Mode"
+    bl_options = {"UNDO"}
+
+    @classmethod
+    def poll(self, context):
+        objs = context.selected_objects
+        if context.mode not in ["PAINT_WEIGHT", "POSE"]: return False
+        return True
+    
+    def execute(self, context):
+        objs = [obj for obj in context.selected_objects if obj.type in ['ARMATURE','MESH']]
+        def get_from_type(type):
+            return [obj for obj in objs if obj.type == type][0]
+        
+        armature = get_from_type("ARMATURE")
+        mesh = get_from_type("MESH")
+
+        mode = context.mode
+        bpy.ops.object.mode_set(mode="OBJECT")
+        if mode == "PAINT_WEIGHT":
+            context.view_layer.objects.active = armature
+            bpy.ops.object.mode_set(mode="POSE")
+        elif mode == "POSE":
+            context.view_layer.objects.active = mesh
+            bpy.ops.object.mode_set(mode="WEIGHT_PAINT")
+        return {"FINISHED"}
+
 class SummonBone(bpy.types.Operator):
     bl_idname = "armature.summon_bone"
     bl_label = "Summon Bone"
