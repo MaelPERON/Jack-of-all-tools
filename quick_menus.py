@@ -1,6 +1,6 @@
 import bpy
 from math import radians
-from .operators import AddColorAttribute, EditMetarig, GenerateRig
+from .operators import AddColorAttribute, EditMetarig, GenerateRig, ToggleSkinMode
 from .utils import getIndex, placeOperator
 
 def menu_merge(self, context):
@@ -210,6 +210,9 @@ class WeightShortcuts(bpy.types.Menu):
                 op.mask = "SELECTED"
         else:
             pie.separator()
+
+        pie.separator()
+        placeOperator(pie, ToggleSkinMode)
 
 def register():
     bpy.types.VIEW3D_MT_edit_mesh_merge.append(menu_merge)
