@@ -201,6 +201,16 @@ class WeightShortcuts(bpy.types.Menu):
         pie = self.layout.menu_pie()
         draw_return_button(pie, QuickMenu)
 
+        if context.selected_pose_bones is not None and len(context.selected_pose_bones) > 0:
+            row = pie.row()
+            for action in ["LOCK","UNLOCK","TOGGLE"]:
+                icon = (action+"ED") if action != "TOGGLE" else "UV_SYNC_SELECT"
+                op = row.operator("object.vertex_group_lock", icon=icon, text="")
+                op.action = action
+                op.mask = "SELECTED"
+        else:
+            pie.separator()
+
 def register():
     bpy.types.VIEW3D_MT_edit_mesh_merge.append(menu_merge)
     bpy.types.VIEW3D_MT_uv_map.append(menu_uv)
