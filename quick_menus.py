@@ -56,6 +56,7 @@ class QuickMenu(bpy.types.Menu):
         draw_subpie_menu(layout, RigShortcuts)
         draw_subpie_menu(layout, ObjectVisibility)
         draw_subpie_menu(layout, SceneUtility)
+        draw_subpie_menu(layout, WeightShortcuts)
 
 class ViewportDisplay(bpy.types.Menu):
     bl_label = "Viewport Display"
@@ -190,6 +191,15 @@ class RigShortcuts(bpy.types.Menu):
         if context.preferences.addons.get("rigify"):
             pie.operator_context = "INVOKE_DEFAULT"
             placeOperator(pie, GenerateRig)
+
+class WeightShortcuts(bpy.types.Menu):
+    bl_idname = "VIEW3D_MT_joat_skining"
+    bl_label = "Weight Painting Shortcuts"
+    bl_icon = "OUTLINER_OB_ARMATURE"
+
+    def draw(self, context):
+        pie = self.layout.menu_pie()
+        draw_return_button(pie, QuickMenu)
 
 def register():
     bpy.types.VIEW3D_MT_edit_mesh_merge.append(menu_merge)
