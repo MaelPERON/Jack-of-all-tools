@@ -202,10 +202,12 @@ class WeightShortcuts(bpy.types.Menu):
         draw_return_button(pie, QuickMenu)
 
         if context.selected_pose_bones is not None and len(context.selected_pose_bones) > 0:
-            row = pie.row()
+            box = pie.box()
+            box.label(text="Lock/Unlock/Toggle")
+            col = box.column()
             for action in ["LOCK","UNLOCK","TOGGLE"]:
                 icon = (action+"ED") if action != "TOGGLE" else "UV_SYNC_SELECT"
-                op = row.operator("object.vertex_group_lock", icon=icon, text="")
+                op = col.operator("object.vertex_group_lock", icon=icon, text="")
                 op.action = action
                 op.mask = "SELECTED"
         else:
