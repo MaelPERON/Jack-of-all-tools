@@ -9,6 +9,7 @@ class GetBonesHierarchy(bpy.types.Operator):
     bl_options = {"REGISTER","UNDO"}
 
     direction: bpy.props.EnumProperty(name="Direction",items=[("BT","Bottom to top","Parent <- Child (vertical)"),("RL","Right to left","Parent <- Child (horizontal)"),("TB","Top to bottom","Child -> Parent (vertical)"),("LR","Left to right","Child -> Parent (horizontal)")],default="BT")
+    show_constraints: bpy.props.BoolProperty(name="Show Constraints",default=True)
 
     @classmethod
     def poll(self, context):
@@ -39,7 +40,7 @@ class GetBonesHierarchy(bpy.types.Operator):
             
             output.append(line)
             
-            if (constraints := getattr(obj.pose.bones.get(bone.name), "constraints", None)) is not None:
+            if (constraints := getattr(obj.pose.bones.get(bone.name), "constraints", None)) is not None and self.show_constraints:
                 for constraint in constraints:
                     if (target := getattr(constraint, "target", None)) is not None and obj == target:
                         if (subtarget := getattr(constraint, "subtarget", None)) is not None:
@@ -53,4 +54,6 @@ class GetBonesHierarchy(bpy.types.Operator):
         return {"FINISHED"}
     
     def draw(self, context):
-        self.layout.prop(self, "direction")
+        layout = self.layout
+        layout.prop(self, "direction")
+        layout.prop(self, "show_constraints")
