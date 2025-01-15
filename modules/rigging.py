@@ -39,13 +39,14 @@ class GetBonesHierarchy(bpy.types.Operator):
             
             output.append(line)
             
-            for constraint in obj.pose.bones.get(bone.name).constraints:
-                if (target := getattr(constraint, "target", None)) is not None and obj == target:
-                    if (subtarget := getattr(constraint, "subtarget", None)) is not None:
-                        constraint_line = f"\t{self.get_id(bone.name)} -. {constraint.type} .-> {self.get_id(subtarget)}"
-                        if subtarget not in bones.keys():
-                            constraint_line += f"[{subtarget}]"
-                        output.append(constraint_line)
+            if (constraints := getattr(obj.pose.bones.get(bone.name), "constraints", None)) is not None:
+                for constraint in constraints:
+                    if (target := getattr(constraint, "target", None)) is not None and obj == target:
+                        if (subtarget := getattr(constraint, "subtarget", None)) is not None:
+                            constraint_line = f"\t{self.get_id(bone.name)} -. {constraint.type} .-> {self.get_id(subtarget)}"
+                            if subtarget not in bones.keys():
+                                constraint_line += f"[{subtarget}]"
+                            output.append(constraint_line)
 
         self.report({"INFO"}, '\n'.join(output))
         self.report({"INFO"}, f"Flowchart successfully generated for {len(bones)} bones. Click to see.")
