@@ -28,7 +28,7 @@ class GetBonesHierarchy(bpy.types.Operator):
             
             line = "\t" + self.get_id(bone.name) + f"[{bone.name}]" + " "
             if parent is not None:
-                line += "-->" if bone.use_connect else "-.->"
+                line += "==>" if bone.use_connect else "-->"
                 line += f" {self.get_id(parent.name)}"
                 if parent.name not in bones.keys():
                     line += f"[{parent.name}]"
