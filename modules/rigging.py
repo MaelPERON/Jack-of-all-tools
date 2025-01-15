@@ -6,6 +6,9 @@ chs = "abcdefghijklmnopqrstuvxyz0123456789"
 class GetBonesHierarchy(bpy.types.Operator):
     bl_idname = "armature.joat_get_hierarchy"
     bl_label = "Get Bones Hierarchy"
+    bl_options = {"REGISTER","UNDO"}
+
+    direction: bpy.props.EnumProperty(name="Direction",items=[("BT","Bottom to top","Parent <- Child (vertical)"),("RL","Right to left","Parent <- Child (horizontal)"),("TB","Top to bottom","Child -> Parent (vertical)"),("LR","Left to right","Child -> Parent (horizontal)")],default="BT")
 
     @classmethod
     def poll(self, context):
@@ -21,7 +24,7 @@ class GetBonesHierarchy(bpy.types.Operator):
         obj = context.active_object
         bones = context.selected_bones if context.mode == "EDIT_ARMATURE" else [bone.bone for bone in context.selected_pose_bones]
         bones = {bone.name: bone for bone in bones}
-        output = ["flowchart BT"]
+        output = [f"flowchart {self.direction}"]
 
         for bone in bones.values():
             parent = getattr(bone, "parent", None)
@@ -47,3 +50,6 @@ class GetBonesHierarchy(bpy.types.Operator):
         self.report({"INFO"}, '\n'.join(output))
         self.report({"INFO"}, f"Flowchart successfully generated for {len(bones)} bones. Click to see.")
         return {"FINISHED"}
+    
+    def draw(self, context):
+        self.layout.prop(self, "direction")
