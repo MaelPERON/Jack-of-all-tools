@@ -9,7 +9,11 @@ class GetBonesHierarchy(bpy.types.Operator):
     bl_options = {"REGISTER","UNDO"}
 
     direction: bpy.props.EnumProperty(name="Direction",items=[("BT","Bottom to top","Parent <- Child (vertical)"),("RL","Right to left","Parent <- Child (horizontal)"),("TB","Top to bottom","Child -> Parent (vertical)"),("LR","Left to right","Child -> Parent (horizontal)")],default="BT")
-    show_constraints: bpy.props.BoolProperty(name="Show Constraints",default=True)
+    show_constraints: bpy.props.EnumProperty(name="Show Constraints",items=[
+        ("never", "Never", "Constraints are not shown inside graph."),
+        ("visible", "Visible", "If targeted bone is visible, the the constraint is shown."),
+        ("always", "Always", "Every constraint is shown inside the graph.")
+    ],default="always")
 
     @classmethod
     def poll(self, context):
@@ -40,10 +44,12 @@ class GetBonesHierarchy(bpy.types.Operator):
             
             output.append(line)
             
-            if (constraints := getattr(obj.pose.bones.get(bone.name), "constraints", None)) is not None and self.show_constraints:
+            if (constraints := getattr(obj.pose.bones.get(bone.name), "constraints", None)) is not None and self.show_constraints != "never":
                 for constraint in constraints:
                     if (target := getattr(constraint, "target", None)) is not None and obj == target:
                         if (subtarget := getattr(constraint, "subtarget", None)) is not None:
+                            bone_subtarget = obj.pose.bones.get(subtarget).bone if context.mode == "POSE" else bpy.data.armatures.get(obj.name).bones.get(subtarget)
+                            if self.show_constraints == "visible" and bone_subtarget.hide: continue
                             constraint_line = f"\t{self.get_id(bone.name)} -. {constraint.type} .-> {self.get_id(subtarget)}"
                             if subtarget not in bones.keys():
                                 constraint_line += f"[{subtarget}]"
