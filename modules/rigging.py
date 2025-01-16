@@ -3,6 +3,35 @@ from random import choices, seed
 
 chs = "abcdefghijklmnopqrstuvxyz0123456789"
 
+class SelectBonesWithName(bpy.types.Operator):
+    bl_idname = "armature.select_with_name"
+    bl_label = "Select Bones With Names"
+    bl_options = {"UNDO"}
+    
+    search_string: bpy.props.StringProperty(name="Search String")
+    mode: bpy.props.EnumProperty(name="Selection Mode",items=[("replace", "Replace",""),("additive", "Additive",""),("substractive", "Substractive","")],default="replace")
+
+    @classmethod
+    def poll(self, context):
+        return context.mode == "POSE"
+    
+    def execute(self, context):
+        obj = context.active_object
+        bones = obj.pose.bones
+
+        if self.mode == "replace": bpy.ops.pose.select_all(action="DESELECT")
+        for bone in bones:
+            if self.search_string in bone.name:
+                if self.mode == "substractive":
+                    bone.bone.select = False
+                else:
+                    bone.bone.select = True
+        
+        return {"FINISHED"}
+    
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+
 class GetBonesHierarchy(bpy.types.Operator):
     bl_idname = "armature.joat_get_hierarchy"
     bl_label = "Get Bones Hierarchy"
