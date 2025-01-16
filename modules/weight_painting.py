@@ -4,10 +4,11 @@ from bpy.props import *
 def enum_collections(scene, context):
 	items = []
 
-	armature = [obj for obj in context.selected_objects if obj.type == "ARMATURE"][0]
-	armature = bpy.data.armatures.get(armature.name)
-	for collection in armature.collections:
-		items.append((collection.name, collection.name, f"Select {collection.name} collection"))
+	armatures = [obj for obj in context.selected_objects if obj.type == "ARMATURE"]
+	if len(armatures) > 0:
+		armature = bpy.data.armatures.get(armatures[0].name)
+		for collection in armature.collections:
+			items.append((collection.name, collection.name, f"Select {collection.name} collection"))
 	return items
 
 class WeightOperator():
