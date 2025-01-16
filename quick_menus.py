@@ -1,6 +1,7 @@
 import bpy
 from math import radians
-from .operators import AddColorAttribute, EditMetarig, GenerateRig, ToggleSkinMode
+from .operators import AddColorAttribute, EditMetarig, GenerateRig
+from .modules.weight_painting import SelectionToVertexGroup, ToggleSkinMode
 from .modules.rigging import SelectBonesWithName, GetBonesHierarchy
 from .utils import getIndex, placeOperator
 
