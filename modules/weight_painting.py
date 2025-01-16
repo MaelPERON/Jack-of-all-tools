@@ -1,11 +1,23 @@
 import bpy
 from bpy.props import *
 
+def enum_collections(scene, context):
+	items = []
+
+	armature = [obj for obj in context.selected_objects if obj.type == "ARMATURE"][0]
+	armature = bpy.data.armatures.get(armature.name)
+	for collection in armature.collections:
+		items.append((collection.name, collection.name, f"Select {collection.name} collection"))
+	return items
+
 class WeightOperator():
 	def get_objs(self, context):
 		return [obj for obj in context.selected_objects if obj.type in ['ARMATURE','MESH']]
 	
-	def from_type(self, objs, type, single=False):
+	def get_armature(self, context):
+		return self.from_type(self.get_objs, "ARMATURE")[0]
+
+	def from_type(self, objs, type):
 		return [obj for obj in objs if obj.type == type]
 	
 	@classmethod
@@ -71,7 +83,8 @@ class ToggleSoloCollection(bpy.types.Operator, WeightOperator):
 	bl_label = "Toggle Solo Collection"
 	bl_options = {"REGISTER","UNDO"}
 
-	collec_name: bpy.props.StringProperty(name="Collection Name",default="DEF")
+	# collec_name: bpy.props.StringProperty(name="Collection Name",default="DEF")
+	collec_name: bpy.props.EnumProperty(name="Collection Name",items=enum_collections) # TODO: no collections --> return error, set the new poll
 
 	def execute(self, context):
 		objs = self.get_objs(context)
