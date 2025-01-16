@@ -65,3 +65,23 @@ class ToggleSkinMode(bpy.types.Operator, WeightOperator):
 			context.view_layer.objects.active = mesh
 			bpy.ops.object.mode_set(mode="WEIGHT_PAINT")
 		return {"FINISHED"}
+	
+class ToggleSoloCollection(bpy.types.Operator, WeightOperator):
+	bl_idname = "joat.toggle_soll_collection"
+	bl_label = "Toggle Solo Collection"
+	bl_options = {"REGISTER","UNDO"}
+
+	collec_name: bpy.props.StringProperty(name="Collection Name",default="DEF")
+
+	def execute(self, context):
+		objs = self.get_objs(context)
+
+		armature = self.from_type(objs, "ARMATURE")[0]
+		armature = bpy.data.armatures.get(armature.name)
+		collection = armature.collections.get(self.collec_name)
+		if collection is None:
+			self.report({"ERROR_INVALID_INPUT"}, f"{self.collec_name} doesn't exist.")
+			return {"CANCELLED"}
+
+		collection.is_solo = not collection.is_solo
+		return {"FINISHED"}
