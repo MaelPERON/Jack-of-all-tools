@@ -1,7 +1,14 @@
 import bpy
 from bpy.props import *
 
-class SelectionToVertexGroup(bpy.types.Operator):
+class WeightOperator():
+	def get_objs(self, context):
+		return [obj for obj in context.selected_objects if obj.type in ['ARMATURE','MESH']]
+	
+	def from_type(self, objs, type, single=False):
+		return [obj for obj in objs if obj.type == type]
+
+class SelectionToVertexGroup(bpy.types.Operator, WeightOperator):
 	bl_idname = "paint.joat_selection_to_vertex_group"
 	bl_label = "Selection To Vertex Group"
 	bl_options = {"REGISTER","UNDO"}
@@ -32,31 +39,29 @@ class SelectionToVertexGroup(bpy.types.Operator):
 
 		return {"FINISHED"}
 	
-class ToggleSkinMode(bpy.types.Operator):
-    bl_idname = "joat.toggle_skin_mode"
-    bl_label = "Toggle Skin Mode"
-    bl_options = {"UNDO"}
+class ToggleSkinMode(bpy.types.Operator, WeightOperator):
+	bl_idname = "joat.toggle_skin_mode"
+	bl_label = "Toggle Skin Mode"
+	bl_options = {"UNDO"}
 
-    @classmethod
-    def poll(self, context):
-        objs = context.selected_objects
-        if context.mode not in ["PAINT_WEIGHT", "POSE"]: return False
-        return True
-    
-    def execute(self, context):
-        objs = [obj for obj in context.selected_objects if obj.type in ['ARMATURE','MESH']]
-        def get_from_type(type):
-            return [obj for obj in objs if obj.type == type][0]
-        
-        armature = get_from_type("ARMATURE")
-        mesh = get_from_type("MESH")
+	@classmethod
+	def poll(self, context):
+		objs = context.selected_objects
+		if context.mode not in ["PAINT_WEIGHT", "POSE"]: return False
+		return True
+	
+	def execute(self, context):
+		objs = self.get_objs(context)
+		
+		armature = self.from_type(objs, "ARMATURE")[0]
+		mesh = self.from_type(objs, "MESH")[0]
 
-        mode = context.mode
-        bpy.ops.object.mode_set(mode="OBJECT")
-        if mode == "PAINT_WEIGHT":
-            context.view_layer.objects.active = armature
-            bpy.ops.object.mode_set(mode="POSE")
-        elif mode == "POSE":
-            context.view_layer.objects.active = mesh
-            bpy.ops.object.mode_set(mode="WEIGHT_PAINT")
-        return {"FINISHED"}
+		mode = context.mode
+		bpy.ops.object.mode_set(mode="OBJECT")
+		if mode == "PAINT_WEIGHT":
+			context.view_layer.objects.active = armature
+			bpy.ops.object.mode_set(mode="POSE")
+		elif mode == "POSE":
+			context.view_layer.objects.active = mesh
+			bpy.ops.object.mode_set(mode="WEIGHT_PAINT")
+		return {"FINISHED"}
