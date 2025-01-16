@@ -7,6 +7,12 @@ class WeightOperator():
 	
 	def from_type(self, objs, type, single=False):
 		return [obj for obj in objs if obj.type == type]
+	
+	@classmethod
+	def poll(self, context):
+		objs = context.selected_objects
+		if context.mode not in ["PAINT_WEIGHT", "POSE"]: return False
+		return True
 
 class SelectionToVertexGroup(bpy.types.Operator, WeightOperator):
 	bl_idname = "paint.joat_selection_to_vertex_group"
@@ -43,12 +49,6 @@ class ToggleSkinMode(bpy.types.Operator, WeightOperator):
 	bl_idname = "joat.toggle_skin_mode"
 	bl_label = "Toggle Skin Mode"
 	bl_options = {"UNDO"}
-
-	@classmethod
-	def poll(self, context):
-		objs = context.selected_objects
-		if context.mode not in ["PAINT_WEIGHT", "POSE"]: return False
-		return True
 	
 	def execute(self, context):
 		objs = self.get_objs(context)
