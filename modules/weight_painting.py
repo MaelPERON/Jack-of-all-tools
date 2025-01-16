@@ -22,10 +22,12 @@ class WeightOperator():
 		return [obj for obj in objs if obj.type == type]
 	
 	@classmethod
+	def context_mode(self, context):
+		return context.mode in ["PAINT_WEIGHT", "POSE"]
+
+	@classmethod
 	def poll(self, context):
-		objs = context.selected_objects
-		if context.mode not in ["PAINT_WEIGHT", "POSE"]: return False
-		return True
+		return self.context_mode(context)
 
 class SelectionToVertexGroup(bpy.types.Operator, WeightOperator):
 	bl_idname = "paint.joat_selection_to_vertex_group"
@@ -99,3 +101,7 @@ class ToggleSoloCollection(bpy.types.Operator, WeightOperator):
 
 		collection.is_solo = not collection.is_solo
 		return {"FINISHED"}
+	
+	@classmethod
+	def poll(self, context):
+		return len(enum_collections(context.scene, context)) > 0
