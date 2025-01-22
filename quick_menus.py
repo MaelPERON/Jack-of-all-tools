@@ -1,6 +1,8 @@
 import bpy
 from math import radians
-from .operators import AddColorAttribute, EditMetarig, GenerateRig, ToggleSkinMode
+from .operators import AddColorAttribute, EditMetarig, GenerateRig
+from .modules.weight_painting import ToggleSoloCollection, ToggleSkinMode
+from .modules.rigging import SelectBonesWithName, GetBonesHierarchy
 from .utils import getIndex, placeOperator
 
 def menu_merge(self, context):
@@ -191,6 +193,8 @@ class RigShortcuts(bpy.types.Menu):
         if context.preferences.addons.get("rigify"):
             pie.operator_context = "INVOKE_DEFAULT"
             placeOperator(pie, GenerateRig)
+            placeOperator(pie, SelectBonesWithName)
+            placeOperator(pie, GetBonesHierarchy)
 
 class WeightShortcuts(bpy.types.Menu):
     bl_idname = "VIEW3D_MT_joat_skining"
@@ -215,6 +219,7 @@ class WeightShortcuts(bpy.types.Menu):
 
         pie.separator()
         placeOperator(pie, ToggleSkinMode)
+        placeOperator(pie, ToggleSoloCollection)
 
 def register():
     bpy.types.VIEW3D_MT_edit_mesh_merge.append(menu_merge)
