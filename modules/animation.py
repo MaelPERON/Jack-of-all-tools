@@ -47,3 +47,32 @@ class SwitchDopesheet(bpy.types.Operator):
     
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
+    
+class ExportPlayblast(bpy.types.Operator):
+    bl_idname = "animation.joat_export_playblast"
+    bl_label = "Export Playblast"
+    bl_options = {"REGISTER","UNDO"}
+    has_loom = False
+
+    version: bpy.props.IntProperty()
+
+    @classmethod
+    def poll(self, context):
+        return context.area.type == "VIEW_3D"
+    
+    def execute(self, context):
+        if self.has_loom : context.scene.loom.output_render_version = self.version
+        bpy.ops.render.opengl("INVOKE_DEFAULT", animation=True)
+        return {"FINISHED"}
+    
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="Exporting playblast ?")
+        if self.has_loom : layout.prop(self, "version")
+
+    def invoke(self, context, event):
+        scene = context.scene
+        self.has_loom = hasattr(scene, "loom")
+        if version := scene.loom.output_render_version if self.has_loom else None:
+            self.version = version+1
+        return context.window_manager.invoke_props_dialog(self)
