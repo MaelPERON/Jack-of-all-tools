@@ -1,3 +1,7 @@
+import os
+import subprocess
+import platform
+
 def getIndex(list, index):
     return list[index] if index < len(list) else None
 
@@ -26,3 +30,11 @@ def incrementString(string):
             string = sub(compile(f"({match})"), str(match+1), string)
 
     return string
+
+def open_directory_in_explorer(path):
+    if platform.system() == "Windows":
+        subprocess.Popen(f'explorer "{path}"')
+    elif platform.system() == "Darwin":  # macOS
+        subprocess.Popen(['open', path])
+    else:  # Linux ?
+        subprocess.Popen(['xdg-open', path])
