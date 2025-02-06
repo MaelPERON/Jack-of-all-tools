@@ -1,4 +1,7 @@
 import bpy
+from bpy.app.handlers import persistent
+import os
+from ..utils import open_directory_in_explorer
 
 class QuickDopesheetSwitch(bpy.types.Menu):
     bl_idname = "DOPESHEET_MT_joat_switchdopesheet"
@@ -69,6 +72,9 @@ class ExportPlayblast(bpy.types.Operator):
         layout = self.layout
         layout.label(text="Exporting playblast ?")
         if self.has_loom : layout.prop(self, "version")
+        layout.separator()
+        box = layout.box()
+        box.label(text=context.scene.render.filepath,icon="FOLDER_REDIRECT")
 
     def invoke(self, context, event):
         scene = context.scene
@@ -76,3 +82,21 @@ class ExportPlayblast(bpy.types.Operator):
         if version := scene.loom.output_render_version if self.has_loom else None:
             self.version = version+1
         return context.window_manager.invoke_props_dialog(self)
+    
+class OpenPlayblastFolder(bpy.types.Operator):
+    bl_idname = "animation.joat_open_playblast_folder"
+    bl_label = "Open Playblast Folder"
+
+    @classmethod
+    def poll(self, context):
+        return True
+    
+    def execute(self, context):
+        filepath = context.scene.render.filepath
+        folder = os.path.dirname(filepath)
+        if os.path.exists(folder):
+            open_directory_in_explorer(folder)
+        else:
+            self.report({"WARN"}, f'"{folder}" doest not exist.')
+            return {"CANCELLED"}
+        return {"FINISHED"}
