@@ -5,9 +5,9 @@ import platform
 def getIndex(list, index):
     return list[index] if index < len(list) else None
 
-def placeOperator(layout, Operator):
+def placeOperator(layout, Operator, label=None, icon=None):
     kwargs = {}
-    if (icon := getattr(Operator, "bl_icon", None)):
+    if (icon := getattr(Operator, "bl_icon", None) or icon):
         kwargs['icon'] = icon
     op = layout.operator(Operator.bl_idname, text=label or Operator.bl_label, **kwargs)
     return op
