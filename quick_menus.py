@@ -3,6 +3,7 @@ from math import radians
 from .operators import AddColorAttribute, EditMetarig, GenerateRig
 from .modules.weight_painting import ToggleSoloCollection, ToggleSkinMode
 from .modules.rigging import SelectBonesWithName, GetBonesHierarchy
+from .modules.annotation import SetStrokePlacement
 from .utils import getIndex, placeOperator
 
 def menu_merge(self, context):
@@ -220,6 +221,25 @@ class WeightShortcuts(bpy.types.Menu):
         pie.separator()
         placeOperator(pie, ToggleSkinMode)
         placeOperator(pie, ToggleSoloCollection)
+
+class AnnotationShortcuts(bpy.types.Menu):
+    bl_idname = "VIEW3D_MT_joat_annotation"
+    bl_label = "Annotation Shortcuts"
+    bl_icon = "GREASEPENCIL"
+
+    def draw(self, context):
+        pie = self.layout.menu_pie()
+        draw_return_button(pie, QuickMenu)
+
+        cursor = placeOperator(pie, SetStrokePlacement, "Stroke Placement (Cursor)", "PIVOT_CURSOR")
+        cursor.mode = "CURSOR"
+
+        view = placeOperator(pie, SetStrokePlacement, "Stroke Placement (View)", "RESTRICT_VIEW_ON")
+        view.mode = "VIEW"
+        
+        surface = placeOperator(pie, SetStrokePlacement, "Stroke Placement (Surface)", "FACESEL")
+        surface.mode = "SURFACE"
+        
 
 def register():
     bpy.types.VIEW3D_MT_edit_mesh_merge.append(menu_merge)
