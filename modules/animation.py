@@ -28,7 +28,7 @@ class SwitchDopesheet(bpy.types.Operator):
     bl_idname = "area.switch_dopesheet"
     bl_label = "Switch Dopesheet"
 
-    mode: bpy.props.EnumProperty(items=[
+    mode: bpy.props.EnumProperty(items=[ # type: ignore
         ("DOPESHEET", "Dopesheet", ""),
         ("ACTION", "Action", ""),
         ("SHAPEKEY", "Shapekey", ""),
@@ -57,7 +57,7 @@ class ExportPlayblast(bpy.types.Operator):
     bl_options = {"REGISTER","UNDO"}
     has_loom = False
 
-    version: bpy.props.IntProperty()
+    version: bpy.props.IntProperty() # type: ignore
 
     @classmethod
     def poll(self, context):
