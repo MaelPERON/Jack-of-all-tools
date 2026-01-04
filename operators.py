@@ -451,3 +451,19 @@ class SelectLightGroup(bpy.types.Operator):
 
         if len(hidden_objs)>0: self.report({"WARN"}, "{objects} could not be selected (they're hidden)".format(objects=','.join(obj.name for obj in hidden_objs)))
         return {"FINISHED"}
+
+class CalcDistanceOperator(bpy.types.Operator):
+    bl_idname = "object.calc_distance"
+    bl_label = "Calculate Distance to 3D Cursor"
+    bl_options = {"REGISTER", "UNDO"}
+
+    @classmethod
+    def poll(cls, context):
+        return len(context.selected_objects) > 0
+
+    def execute(self, context):
+        cursor_location = context.scene.cursor.location
+        for obj in context.selected_objects:
+            dist = (obj.location - cursor_location).length
+            self.report({"INFO"}, f"Distance from 3D cursor to '{obj.name}': {dist:.4f}")
+        return {"FINISHED"}
