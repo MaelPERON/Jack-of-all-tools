@@ -15,7 +15,7 @@ class OBJECT_OT_create_offset(bpy.types.Operator):
 		name="Display Size",
 		description="Display size of the empty",
 		default=0.25,
-		min=0.01,
+		min=0.0001,
 		max=10.0
 	)
 
